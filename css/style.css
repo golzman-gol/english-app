@@ -1,0 +1,199 @@
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-alt: #334155;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-dark: #0ea5e9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.5rem;
+}
+
+.app-header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+}
+
+.push-status {
+  margin: 0 1.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+
+main {
+  flex: 1;
+  padding: 0 1.25rem 1.5rem;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.add-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-form input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--surface-alt);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.add-form button,
+.practice-controls button {
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #04202e;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.add-form button:active,
+.practice-controls button:active {
+  background: var(--accent-dark);
+}
+
+.word-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.word-item {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.word-main {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.word-sub {
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+
+.word-sentence {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+.rtl-text {
+  direction: rtl;
+  text-align: right;
+}
+
+.flashcard {
+  min-height: 220px;
+  background: var(--surface);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.card-face {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.card-translation {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-sentence {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.practice-progress {
+  text-align: center;
+  color: var(--muted);
+  margin: 0.6rem 0;
+}
+
+.practice-controls {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.tab-bar {
+  display: flex;
+  border-top: 1px solid var(--surface-alt);
+  background: var(--surface);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.9rem 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.tab-button.active {
+  color: var(--accent);
+  font-weight: 600;
+}

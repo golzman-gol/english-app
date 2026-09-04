@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Word Catch</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Word Catch</h1>
+      <button id="enable-push" class="link-button" type="button">הפעל התראות</button>
+    </header>
+    <p id="push-status" class="push-status"></p>
+
+    <main>
+      <section id="add-panel" class="tab-panel active">
+        <form id="add-word-form" class="add-form">
+          <input
+            id="word-input"
+            type="text"
+            placeholder="מילה חדשה באנגלית..."
+            autocomplete="off"
+            autocapitalize="off"
+            required
+          />
+          <button type="submit">שמור</button>
+        </form>
+        <ul id="word-list" class="word-list"></ul>
+      </section>
+
+      <section id="practice-panel" class="tab-panel">
+        <div id="flashcard" class="flashcard"></div>
+        <p id="practice-progress" class="practice-progress"></p>
+        <div class="practice-controls">
+          <button id="flip-btn" type="button">הפוך</button>
+          <button id="next-btn" type="button">הבא</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tab-bar">
+      <button class="tab-button active" data-target="add-panel" type="button">➕ הוספה</button>
+      <button class="tab-button" data-target="practice-panel" type="button">🧠 תרגול</button>
+    </nav>
+
+    <script src="/js/db.js"></script>
+    <script src="/js/push.js"></script>
+    <script src="/js/practice.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

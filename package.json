@@ -1,0 +1,13 @@
+{
+  "name": "word-catch",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "generate-icons": "node scripts/generate-placeholder-icons.js"
+  },
+  "dependencies": {
+    "@vercel/kv": "^1.0.1",
+    "web-push": "^3.6.7"
+  }
+}
