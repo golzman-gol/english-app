@@ -6,6 +6,7 @@
   --muted: #94a3b8;
   --accent: #38bdf8;
   --accent-dark: #0ea5e9;
+  --warn: #f59e0b;
 }
 
 * {
@@ -114,14 +115,31 @@ main {
   background: var(--surface);
 }
 
-.badge-mastered {
+.practice-controls .btn-medium {
+  background: var(--warn);
+  color: #2b1900;
+}
+
+.practice-controls .btn-medium:active {
+  background: #d97706;
+}
+
+.badge {
   font-size: 0.7rem;
   font-weight: 600;
-  background: var(--accent);
-  color: #04202e;
   padding: 0.1rem 0.45rem;
   border-radius: 6px;
   margin-left: 0.4rem;
+}
+
+.badge-known {
+  background: var(--accent);
+  color: #04202e;
+}
+
+.badge-medium {
+  background: var(--warn);
+  color: #2b1900;
 }
 
 .word-list {
@@ -214,6 +232,32 @@ main {
 
 .practice-controls[hidden] {
   display: none;
+}
+
+.category-group {
+  margin-bottom: 1.5rem;
+}
+
+.category-heading {
+  font-size: 1rem;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+}
+
+.category-empty {
+  font-size: 0.9rem;
+}
+
+.category-select {
+  margin-top: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--surface-alt);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
 }
 
 .tab-bar {

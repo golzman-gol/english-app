@@ -58,8 +58,7 @@ module.exports = async (req, res) => {
     sentence,
     addedAt: Date.now(),
     lastNotifiedAt: 0,
-    mastered: false,
-    correctStreak: 0,
+    category: 'learning',
   };
 
   const key = `words:${deviceId}`;

@@ -1,12 +1,14 @@
 const { kv } = require('@vercel/kv');
 
+const VALID_CATEGORIES = new Set(['learning', 'medium', 'known']);
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
-  const { deviceId, word, mastered, correctStreak } = req.body || {};
+  const { deviceId, word, category } = req.body || {};
   if (!deviceId || !word) {
     res.status(400).json({ error: 'deviceId and word are required' });
     return;
@@ -21,8 +23,9 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (typeof mastered === 'boolean') words[idx].mastered = mastered;
-  if (typeof correctStreak === 'number') words[idx].correctStreak = correctStreak;
+  if (typeof category === 'string' && VALID_CATEGORIES.has(category)) {
+    words[idx].category = category;
+  }
   await kv.set(key, words);
 
   res.status(200).json({ ok: true, synced: true, entry: words[idx] });

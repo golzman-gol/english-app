@@ -51,17 +51,24 @@
         </div>
         <div class="practice-controls" id="grade-controls" hidden>
           <button id="learning-btn" type="button" class="btn-secondary">Still learning</button>
+          <button id="medium-btn" type="button" class="btn-medium">Medium</button>
           <button id="know-btn" type="button">I know this ✅</button>
         </div>
+      </section>
+
+      <section id="words-panel" class="tab-panel">
+        <div id="words-groups"></div>
       </section>
     </main>
 
     <nav class="tab-bar">
       <button class="tab-button active" data-target="add-panel" type="button">➕ Add</button>
       <button class="tab-button" data-target="practice-panel" type="button">🧠 Practice</button>
+      <button class="tab-button" data-target="words-panel" type="button">📚 Words</button>
     </nav>
 
     <script src="/js/db.js"></script>
+    <script src="/js/categories.js"></script>
     <script src="/js/push.js"></script>
     <script src="/js/practice.js"></script>
     <script src="/js/app.js"></script>

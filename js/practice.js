@@ -12,13 +12,17 @@ function shuffle(array) {
 
 async function start(preferredWord) {
   const words = await WordDb.getAllWords();
-  const active = words.filter((w) => w.word && !w.mastered);
-  const mastered = words.filter((w) => w.word && w.mastered);
-  // Mastered words still show up occasionally so they don't fade away completely,
-  // just far less often than words you're still learning.
-  const masteredSample = shuffle(mastered).slice(0, Math.ceil(mastered.length * 0.2));
+  const byCategory = { learning: [], medium: [], known: [] };
+  words.forEach((w) => {
+    if (!w.word) return;
+    byCategory[WordCategory.getCategory(w)].push(w);
+  });
 
-  queue = shuffle([...active, ...masteredSample]);
+  // Mastered ("known") words still show up occasionally so they don't fade
+  // away completely, just far less often than words you're still learning.
+  const knownSample = shuffle(byCategory.known).slice(0, Math.ceil(byCategory.known.length * 0.2));
+
+  queue = shuffle([...byCategory.learning, ...byCategory.medium, ...knownSample]);
 
   if (preferredWord) {
     const idx = queue.findIndex((w) => w.word.toLowerCase() === preferredWord.toLowerCase());
@@ -74,12 +78,10 @@ function showAnswer() {
   setControls(false, true);
 }
 
-async function grade(knewIt) {
+async function grade(category) {
   if (currentIndex >= queue.length) return;
   const entry = queue[currentIndex];
-
-  entry.correctStreak = knewIt ? (entry.correctStreak || 0) + 1 : 0;
-  entry.mastered = entry.correctStreak >= 3;
+  entry.category = category;
 
   try {
     await WordDb.updateWord(entry);
@@ -93,8 +95,7 @@ async function grade(knewIt) {
     body: JSON.stringify({
       deviceId: window.WordCatchDeviceId,
       word: entry.word,
-      mastered: entry.mastered,
-      correctStreak: entry.correctStreak,
+      category,
     }),
   }).catch((err) => console.error('Failed to sync progress', err));
 

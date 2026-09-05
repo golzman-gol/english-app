@@ -53,23 +53,36 @@ fully offline.
 ## How word selection works
 
 Each notify run picks **one word per device**, chosen from whichever of your
-saved words haven't been marked "mastered" (see below), preferring whichever
+saved words aren't categorized "Mastered" (see below), preferring whichever
 one hasn't been sent in the longest time — a fair rotation, not a random
 draw, so every word gets equal air time instead of the same ones repeating
 by chance.
 
-## Mastery — reducing practice on words you already know
+## Categorizing words — Still learning / Medium / Mastered
 
-In Practice, after you reveal a card you grade yourself: **"Still learning"**
-or **"I know this"**. Three **"I know this"** in a row marks that word as
-mastered:
+Every word is in one of three categories. There are two ways to set it:
 
-- It's excluded from push notifications entirely (no point being reminded of
-  a word you already know).
-- In Practice mode it still shows up occasionally (about 1 in 5 sessions) so
-  it doesn't fade from memory completely, but the bulk of your practice time
-  goes to words you're still learning.
-- Marking "Still learning" at any point resets its streak back to zero.
+1. **While practicing**: after you reveal a card, grade yourself with one of
+   three buttons — **"Still learning"**, **"Medium"**, or **"I know this"**.
+   Whichever you tap becomes that word's new category immediately (no streak
+   to build up — one tap is enough to move it).
+2. **From the Words tab**: a dedicated screen listing every word grouped
+   under its category, each with a dropdown to reassign it any time. This is
+   the place to go back and move a word you thought you'd mastered weeks ago
+   back to "Still learning" if you find you've actually forgotten it — or to
+   deliberately park a word at "Medium" if it's not quite hard but not quite
+   easy either.
+
+What the category affects:
+
+- **Mastered** words are excluded from push notifications entirely (no point
+  being reminded of a word you already know), and show up in Practice only
+  occasionally (about 1 in 5 sessions) so they don't fade from memory
+  completely.
+- **Still learning** and **Medium** words are both included in every Practice
+  session at full frequency, and are both eligible for push notifications —
+  "Medium" is purely an organizational middle ground for the Words tab, it
+  doesn't reduce anything on its own.
 
 ## Schedule the notifications (free)
 

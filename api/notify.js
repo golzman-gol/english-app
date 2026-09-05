@@ -1,6 +1,13 @@
 const webpush = require('web-push');
 const { kv } = require('@vercel/kv');
 
+// Falls back to the old boolean `mastered` field for words saved before
+// categories existed.
+function getCategory(word) {
+  if (word.category) return word.category;
+  return word.mastered ? 'known' : 'learning';
+}
+
 // Default quiet hours: 23:00–08:00 in Asia/Jerusalem time. Override with the
 // QUIET_HOURS_START / QUIET_HOURS_END / NOTIFY_TIMEZONE env vars if you want
 // different hours. This is a safety net — the main control over *when*
@@ -49,7 +56,7 @@ module.exports = async (req, res) => {
     if (!subscription) continue;
 
     // Don't keep reminding you of words you've already mastered.
-    const eligible = words.filter((w) => !w.mastered);
+    const eligible = words.filter((w) => getCategory(w) !== 'known');
     if (eligible.length === 0) continue;
 
     eligible.sort((a, b) => (a.lastNotifiedAt || 0) - (b.lastNotifiedAt || 0));

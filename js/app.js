@@ -29,6 +29,12 @@ async function loadConfig() {
   }
 }
 
+function categoryBadge(category) {
+  if (category === 'known') return '<span class="badge badge-known">Mastered</span>';
+  if (category === 'medium') return '<span class="badge badge-medium">Medium</span>';
+  return '';
+}
+
 async function renderWordList() {
   const words = await WordDb.getAllWords();
   const list = document.getElementById('word-list');
@@ -40,12 +46,88 @@ async function renderWordList() {
       const item = document.createElement('li');
       item.className = 'word-item';
       item.innerHTML = `
-        <div class="word-main">${entry.word}${entry.mastered ? ' <span class="badge-mastered">Mastered</span>' : ''}</div>
+        <div class="word-main">${entry.word} ${categoryBadge(WordCategory.getCategory(entry))}</div>
         <div class="word-sub rtl-text">${entry.translation || 'Translating...'}</div>
         ${entry.sentence ? `<div class="word-sentence">${entry.sentence}</div>` : ''}
       `;
       list.appendChild(item);
     });
+}
+
+async function updateWordCategory(word, category) {
+  const words = await WordDb.getAllWords();
+  const entry = words.find((w) => w.word === word);
+  if (!entry) return;
+  entry.category = category;
+  await WordDb.updateWord(entry);
+
+  fetch('/api/update-word', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId, word, category }),
+  }).catch((err) => console.error('Failed to sync category', err));
+}
+
+async function renderWordsPage() {
+  const words = await WordDb.getAllWords();
+  const container = document.getElementById('words-groups');
+  container.innerHTML = '';
+
+  const groups = [
+    { key: 'learning', label: 'Still learning' },
+    { key: 'medium', label: 'Medium' },
+    { key: 'known', label: 'Mastered' },
+  ];
+
+  groups.forEach(({ key, label }) => {
+    const items = words
+      .filter((w) => w.word && WordCategory.getCategory(w) === key)
+      .sort((a, b) => b.addedAt - a.addedAt);
+
+    const section = document.createElement('div');
+    section.className = 'category-group';
+
+    const heading = document.createElement('h2');
+    heading.className = 'category-heading';
+    heading.textContent = `${label} (${items.length})`;
+    section.appendChild(heading);
+
+    if (items.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state category-empty';
+      empty.textContent = 'No words here yet.';
+      section.appendChild(empty);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'word-list';
+      items.forEach((entry) => {
+        const li = document.createElement('li');
+        li.className = 'word-item';
+        li.innerHTML = `
+          <div class="word-main">${entry.word}</div>
+          <div class="word-sub rtl-text">${entry.translation || 'Translating...'}</div>
+          ${entry.sentence ? `<div class="word-sentence">${entry.sentence}</div>` : ''}
+          <select class="category-select" data-word="${entry.word.replace(/"/g, '&quot;')}">
+            ${WordCategory.CATEGORY_ORDER.map(
+              (value) =>
+                `<option value="${value}" ${value === key ? 'selected' : ''}>${WordCategory.CATEGORY_LABELS[value]}</option>`
+            ).join('')}
+          </select>
+        `;
+        list.appendChild(li);
+      });
+      section.appendChild(list);
+    }
+
+    container.appendChild(section);
+  });
+
+  container.querySelectorAll('.category-select').forEach((select) => {
+    select.addEventListener('change', async (event) => {
+      await updateWordCategory(event.target.dataset.word, event.target.value);
+      await renderWordsPage();
+    });
+  });
 }
 
 async function handleAddWord(event) {
@@ -70,8 +152,7 @@ async function handleAddWord(event) {
     sentence,
     addedAt: Date.now(),
     lastNotifiedAt: 0,
-    mastered: false,
-    correctStreak: 0,
+    category: 'learning',
   };
   const id = await WordDb.addWord(localEntry);
   localEntry.id = id;
@@ -148,6 +229,8 @@ function setupTabs() {
         WordPractice.start();
       } else if (btn.dataset.target === 'add-panel') {
         renderWordList();
+      } else if (btn.dataset.target === 'words-panel') {
+        renderWordsPage();
       }
     });
   });
@@ -169,8 +252,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('add-word-form').addEventListener('submit', handleAddWord);
   document.getElementById('enable-push').addEventListener('click', handlePushButtonClick);
   document.getElementById('show-answer-btn').addEventListener('click', () => WordPractice.showAnswer());
-  document.getElementById('learning-btn').addEventListener('click', () => WordPractice.grade(false));
-  document.getElementById('know-btn').addEventListener('click', () => WordPractice.grade(true));
+  document.getElementById('learning-btn').addEventListener('click', () => WordPractice.grade('learning'));
+  document.getElementById('medium-btn').addEventListener('click', () => WordPractice.grade('medium'));
+  document.getElementById('know-btn').addEventListener('click', () => WordPractice.grade('known'));
 
   await refreshPushButton();
   await renderWordList();

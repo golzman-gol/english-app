@@ -4,8 +4,8 @@
     {
       "name": "static-preview",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5233"],
-      "port": 5233
+      "runtimeArgs": ["-m", "http.server", "5301"],
+      "port": 5301
     }
   ]
 }
