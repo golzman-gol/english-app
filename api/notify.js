@@ -74,7 +74,19 @@ module.exports = async (req, res) => {
       await webpush.sendNotification(subscription, payload);
       results.push({ deviceId, word: pick.word, ok: true });
     } catch (err) {
-      results.push({ deviceId, word: pick.word, ok: false, error: err.message });
+      // web-push's error message alone is too generic to diagnose from;
+      // surface the actual status code and response body from the push
+      // service so we can see the real reason (mismatched keys, bad JWT,
+      // expired endpoint, etc).
+      results.push({
+        deviceId,
+        word: pick.word,
+        ok: false,
+        error: err.message,
+        statusCode: err.statusCode,
+        pushServiceBody: err.body,
+        endpoint: subscription.endpoint,
+      });
       if (err.statusCode === 410 || err.statusCode === 404) {
         await kv.del(subKey);
       }
