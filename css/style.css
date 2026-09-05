@@ -28,7 +28,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem 0.5rem;
+  padding: max(1rem, env(safe-area-inset-top)) 1.25rem 0.5rem;
 }
 
 .app-header h1 {
