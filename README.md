@@ -129,6 +129,24 @@ your phone's. To stop it:
   server automatically deletes that dead subscription at that point — so it
   cleans itself up within one notification cycle either way.
 
+### "Enable notifications" doesn't seem to do anything
+
+Browsers only ever show the permission prompt **once** per site. If it was
+denied at any point — including by accident, or a browser default — clicking
+"Enable notifications" again does nothing visible, because the browser
+silently refuses to re-prompt. The app now detects this and shows a red
+message telling you so; the fix is always the same: click the padlock/
+site-info icon next to the address bar → **Notifications** → change it from
+Block to **Allow**, then reload the page and try again.
+
+## Deleting a word
+
+Both the Add tab's list and the Words tab have a **Delete** button on every
+word. Tap it once and it turns into **"Confirm delete?"** for 3 seconds —
+tap it again within that window to actually delete (from both this device
+and the server); if you don't confirm in time it just resets back to
+"Delete" and nothing is removed.
+
 ## Local development
 
 Node isn't required to deploy (Vercel builds it for you), only if you want to

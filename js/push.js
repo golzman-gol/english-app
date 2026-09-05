@@ -21,6 +21,12 @@ async function enablePush(deviceId, vapidPublicKey) {
     throw new Error('The server is not configured for notifications yet (missing VAPID key).');
   }
 
+  if (Notification.permission === 'denied') {
+    throw new Error(
+      'Notifications are blocked for this site in your browser. Click the padlock/site-info icon next to the address bar → Notifications → Allow, then reload the page and try again.'
+    );
+  }
+
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
     throw new Error('Notification permission was denied.');

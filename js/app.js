@@ -35,6 +35,44 @@ function categoryBadge(category) {
   return '';
 }
 
+async function deleteWordEverywhere(entry) {
+  await WordDb.deleteWord(entry.id);
+  fetch('/api/delete-word', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId, word: entry.word }),
+  }).catch((err) => console.error('Failed to delete word from server', err));
+}
+
+// Two-tap delete confirmation instead of window.confirm(), which behaves
+// inconsistently inside installed PWAs.
+function wireDeleteButtons(root, words, onDeleted) {
+  root.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      if (button.dataset.armed !== 'true') {
+        button.dataset.armed = 'true';
+        button.textContent = 'Confirm delete?';
+        button.classList.add('delete-btn-armed');
+        setTimeout(() => {
+          if (button.dataset.armed === 'true') {
+            button.dataset.armed = 'false';
+            button.textContent = 'Delete';
+            button.classList.remove('delete-btn-armed');
+          }
+        }, 3000);
+        return;
+      }
+
+      const id = Number(button.dataset.id);
+      const entry = words.find((w) => w.id === id);
+      if (!entry) return;
+      await deleteWordEverywhere(entry);
+      await onDeleted();
+    });
+  });
+}
+
 async function renderWordList() {
   const words = await WordDb.getAllWords();
   const list = document.getElementById('word-list');
@@ -49,9 +87,12 @@ async function renderWordList() {
         <div class="word-main">${entry.word} ${categoryBadge(WordCategory.getCategory(entry))}</div>
         <div class="word-sub rtl-text">${entry.translation || 'Translating...'}</div>
         ${entry.sentence ? `<div class="word-sentence">${entry.sentence}</div>` : ''}
+        <button type="button" class="delete-btn" data-id="${entry.id}">Delete</button>
       `;
       list.appendChild(item);
     });
+
+  wireDeleteButtons(list, words, renderWordList);
 }
 
 async function updateWordCategory(word, category) {
@@ -113,6 +154,7 @@ async function renderWordsPage() {
                 `<option value="${value}" ${value === key ? 'selected' : ''}>${WordCategory.CATEGORY_LABELS[value]}</option>`
             ).join('')}
           </select>
+          <button type="button" class="delete-btn" data-id="${entry.id}">Delete</button>
         `;
         list.appendChild(li);
       });
@@ -128,6 +170,8 @@ async function renderWordsPage() {
       await renderWordsPage();
     });
   });
+
+  wireDeleteButtons(container, words, renderWordsPage);
 }
 
 async function handleAddWord(event) {
@@ -179,6 +223,15 @@ async function handleAddWord(event) {
 async function refreshPushButton() {
   const btn = document.getElementById('enable-push');
   const status = document.getElementById('push-status');
+
+  if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+    status.textContent =
+      'Notifications are blocked for this site in your browser. Click the padlock/site-info icon next to the address bar → Notifications → Allow, then reload this page.';
+    status.classList.add('push-status-error');
+    return;
+  }
+  status.classList.remove('push-status-error');
+
   try {
     const subscription = await WordPush.getSubscriptionState();
     if (subscription) {
@@ -198,6 +251,8 @@ async function handlePushButtonClick() {
   const btn = document.getElementById('enable-push');
   const status = document.getElementById('push-status');
 
+  status.classList.remove('push-status-error');
+
   if (btn.dataset.mode === 'disable') {
     status.textContent = 'Disabling...';
     try {
@@ -205,6 +260,7 @@ async function handlePushButtonClick() {
       status.textContent = 'Notifications disabled on this device.';
     } catch (err) {
       status.textContent = `Error: ${err.message}`;
+      status.classList.add('push-status-error');
     }
   } else {
     status.textContent = 'Enabling...';
@@ -213,6 +269,7 @@ async function handlePushButtonClick() {
       status.textContent = 'Notifications enabled on this device.';
     } catch (err) {
       status.textContent = `Error: ${err.message}`;
+      status.classList.add('push-status-error');
     }
   }
   await refreshPushButton();
