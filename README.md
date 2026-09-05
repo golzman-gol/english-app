@@ -1,9 +1,10 @@
 # Word Catch
 
 A tiny PWA for growing your English vocabulary: catch a new word during the day,
-save it in one tap, and get it pushed back to you later with its Hebrew
-translation and an example sentence. Practice everything in a flashcard mode
-that works fully offline.
+save it in one tap — with your own Hebrew translation and example sentence, or
+leave either blank and the server fills it in automatically — and get it
+pushed back to you later. Practice everything in a flashcard mode that works
+fully offline.
 
 ## How your data is stored
 
@@ -43,7 +44,32 @@ that works fully offline.
 2. Tap the Share icon → **Add to Home Screen**.
 3. Open the app **from the Home Screen icon** (not the Safari tab) — this is
    required for push notifications to work on iOS.
-4. Tap **"הפעל התראות"** and allow notifications when prompted.
+4. Tap **"Enable notifications"** and allow notifications when prompted. The
+   same button turns into **"Disable notifications"** afterwards — tap it
+   again any time to stop notifications on that device (this cleanly removes
+   the subscription both locally and from the server, no need to dig through
+   browser settings).
+
+## How word selection works
+
+Each notify run picks **one word per device**, chosen from whichever of your
+saved words haven't been marked "mastered" (see below), preferring whichever
+one hasn't been sent in the longest time — a fair rotation, not a random
+draw, so every word gets equal air time instead of the same ones repeating
+by chance.
+
+## Mastery — reducing practice on words you already know
+
+In Practice, after you reveal a card you grade yourself: **"Still learning"**
+or **"I know this"**. Three **"I know this"** in a row marks that word as
+mastered:
+
+- It's excluded from push notifications entirely (no point being reminded of
+  a word you already know).
+- In Practice mode it still shows up occasionally (about 1 in 5 sessions) so
+  it doesn't fade from memory completely, but the bulk of your practice time
+  goes to words you're still learning.
+- Marking "Still learning" at any point resets its streak back to zero.
 
 ## Schedule the notifications (free)
 
@@ -59,10 +85,36 @@ want during the day:
    ```
    at whatever times you like — for example 10:00, 15:00, and 20:00.
 
-Each run picks one saved word per device (favoring ones that haven't been
-sent recently) and pushes it with its translation and example sentence.
+**This is also how you control when notifications can happen at all** —
+if you never schedule a trigger between, say, 23:00 and 08:00, nothing can
+fire then, full stop. As a safety net in case a trigger ever lands in that
+window anyway (e.g. a scheduler misfire), `/api/notify` also enforces its own
+quiet hours — by default 23:00–08:00 in Asia/Jerusalem time, skipping the
+whole run silently if called inside that window. Override with the
+`QUIET_HOURS_START`, `QUIET_HOURS_END` (24h, 0–23) and `NOTIFY_TIMEZONE`
+(IANA name, e.g. `Asia/Jerusalem`) environment variables in Vercel if you
+want different hours.
+
 Tapping the notification opens the app straight into Practice mode with that
 word first.
+
+## Notification permission on your computer vs. your iPhone
+
+Enabling notifications works from *any* browser you open the app in — your
+computer's Chrome included — because each browser/device generates its own
+separate subscription (tracked by its own local device ID). If you tested
+"Enable notifications" on your computer while trying things out, that
+created a real, independent subscription for your computer, separate from
+your phone's. To stop it:
+
+- Easiest: open the app on that computer and tap **"Disable notifications"**
+  (now a working toggle, see above) — this removes it from the server too.
+- Or, browser-level: click the padlock/site-info icon next to the address
+  bar → Notifications → Block (or your browser's site settings page → find
+  the site → remove/block it). If the in-app toggle isn't used, a revoked
+  browser permission still causes the *next* push attempt to fail, and the
+  server automatically deletes that dead subscription at that point — so it
+  cleans itself up within one notification cycle either way.
 
 ## Local development
 
