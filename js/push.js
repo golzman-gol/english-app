@@ -33,13 +33,20 @@ async function enablePush(deviceId, vapidPublicKey) {
   }
 
   const registration = await navigator.serviceWorker.ready;
-  let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-    });
+
+  // Always start from a clean slate: an existing subscription may have been
+  // created against a VAPID key the server no longer signs with (e.g. after
+  // the keys were regenerated), and reusing it would silently fail every
+  // push. Re-subscribing fresh on every "Enable" tap avoids that entirely.
+  const existing = await registration.pushManager.getSubscription();
+  if (existing) {
+    await existing.unsubscribe();
   }
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+  });
 
   await fetch('/api/subscribe', {
     method: 'POST',
