@@ -129,6 +129,19 @@ your phone's. To stop it:
   server automatically deletes that dead subscription at that point — so it
   cleans itself up within one notification cycle either way.
 
+### Push works on Chrome but not on iPhone (`BadJwtToken` error)
+
+If a manual test of `/api/notify` returns a `403` with
+`{"reason":"BadJwtToken"}` for the iPhone's device specifically, while a
+desktop browser's device succeeds with the exact same keys, the cause is
+almost certainly the VAPID **subject/contact** value passed to
+`webpush.setVapidDetails(...)` in `api/notify.js` — Apple's push service
+validates this field far more strictly than Google's does. It must be either
+a real `mailto:` address or an `https://` URL; a placeholder like
+`mailto:test@example.local` will be silently accepted by Chrome/Google but
+rejected outright by Apple. Use your actual deployed app URL (or a real
+email) here instead.
+
 ### "Enable notifications" doesn't seem to do anything
 
 Browsers only ever show the permission prompt **once** per site. If it was
