@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   }
 
   webpush.setVapidDetails(
-    'mailto:notifications@word-catch.local',
+    'https://english-app-clec.vercel.app',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
