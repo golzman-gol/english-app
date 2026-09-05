@@ -14,22 +14,30 @@
   <body>
     <header class="app-header">
       <h1>Word Catch</h1>
-      <button id="enable-push" class="link-button" type="button">הפעל התראות</button>
+      <button id="enable-push" class="link-button" type="button" data-mode="enable">Enable notifications</button>
     </header>
     <p id="push-status" class="push-status"></p>
 
     <main>
       <section id="add-panel" class="tab-panel active">
         <form id="add-word-form" class="add-form">
+          <label class="field-label" for="word-input">Word</label>
           <input
             id="word-input"
             type="text"
-            placeholder="מילה חדשה באנגלית..."
+            placeholder="e.g. serendipity"
             autocomplete="off"
             autocapitalize="off"
             required
           />
-          <button type="submit">שמור</button>
+
+          <label class="field-label" for="translation-input">Translation (optional — auto-filled if left blank)</label>
+          <input id="translation-input" type="text" placeholder="Hebrew translation" autocomplete="off" dir="rtl" />
+
+          <label class="field-label" for="sentence-input">Example sentence (optional)</label>
+          <textarea id="sentence-input" placeholder="Use the word in a sentence..." rows="2"></textarea>
+
+          <button type="submit">Save word</button>
         </form>
         <ul id="word-list" class="word-list"></ul>
       </section>
@@ -37,16 +45,20 @@
       <section id="practice-panel" class="tab-panel">
         <div id="flashcard" class="flashcard"></div>
         <p id="practice-progress" class="practice-progress"></p>
-        <div class="practice-controls">
-          <button id="flip-btn" type="button">הפוך</button>
-          <button id="next-btn" type="button">הבא</button>
+
+        <div class="practice-controls" id="show-answer-controls">
+          <button id="show-answer-btn" type="button">Show answer</button>
+        </div>
+        <div class="practice-controls" id="grade-controls" hidden>
+          <button id="learning-btn" type="button" class="btn-secondary">Still learning</button>
+          <button id="know-btn" type="button">I know this ✅</button>
         </div>
       </section>
     </main>
 
     <nav class="tab-bar">
-      <button class="tab-button active" data-target="add-panel" type="button">➕ הוספה</button>
-      <button class="tab-button" data-target="practice-panel" type="button">🧠 תרגול</button>
+      <button class="tab-button active" data-target="add-panel" type="button">➕ Add</button>
+      <button class="tab-button" data-target="practice-panel" type="button">🧠 Practice</button>
     </nav>
 
     <script src="/js/db.js"></script>

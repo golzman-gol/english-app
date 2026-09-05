@@ -10,6 +10,7 @@ function getDeviceId() {
 }
 
 const deviceId = getDeviceId();
+window.WordCatchDeviceId = deviceId;
 let vapidPublicKey = '';
 
 async function registerServiceWorker() {
@@ -39,8 +40,8 @@ async function renderWordList() {
       const item = document.createElement('li');
       item.className = 'word-item';
       item.innerHTML = `
-        <div class="word-main">${entry.word}</div>
-        <div class="word-sub rtl-text">${entry.translation || 'מתרגם...'}</div>
+        <div class="word-main">${entry.word}${entry.mastered ? ' <span class="badge-mastered">Mastered</span>' : ''}</div>
+        <div class="word-sub rtl-text">${entry.translation || 'Translating...'}</div>
         ${entry.sentence ? `<div class="word-sentence">${entry.sentence}</div>` : ''}
       `;
       list.appendChild(item);
@@ -49,13 +50,29 @@ async function renderWordList() {
 
 async function handleAddWord(event) {
   event.preventDefault();
-  const input = document.getElementById('word-input');
-  const word = input.value.trim();
-  if (!word) return;
-  input.value = '';
-  input.focus();
+  const wordInput = document.getElementById('word-input');
+  const translationInput = document.getElementById('translation-input');
+  const sentenceInput = document.getElementById('sentence-input');
 
-  const localEntry = { word, translation: '', sentence: '', addedAt: Date.now(), lastNotifiedAt: 0 };
+  const word = wordInput.value.trim();
+  if (!word) return;
+  const translation = translationInput.value.trim();
+  const sentence = sentenceInput.value.trim();
+
+  wordInput.value = '';
+  translationInput.value = '';
+  sentenceInput.value = '';
+  wordInput.focus();
+
+  const localEntry = {
+    word,
+    translation,
+    sentence,
+    addedAt: Date.now(),
+    lastNotifiedAt: 0,
+    mastered: false,
+    correctStreak: 0,
+  };
   const id = await WordDb.addWord(localEntry);
   localEntry.id = id;
   await renderWordList();
@@ -64,7 +81,7 @@ async function handleAddWord(event) {
     const res = await fetch('/api/add-word', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deviceId, word }),
+      body: JSON.stringify({ deviceId, word, translation, sentence }),
     });
     if (res.ok) {
       const enriched = await res.json();
@@ -78,15 +95,46 @@ async function handleAddWord(event) {
   }
 }
 
-async function handleEnableNotifications() {
+async function refreshPushButton() {
+  const btn = document.getElementById('enable-push');
   const status = document.getElementById('push-status');
-  status.textContent = 'מפעיל...';
   try {
-    await WordPush.enablePush(deviceId, vapidPublicKey);
-    status.textContent = 'התראות פעילות ✔';
+    const subscription = await WordPush.getSubscriptionState();
+    if (subscription) {
+      btn.textContent = 'Disable notifications';
+      btn.dataset.mode = 'disable';
+    } else {
+      btn.textContent = 'Enable notifications';
+      btn.dataset.mode = 'enable';
+      status.textContent = '';
+    }
   } catch (err) {
-    status.textContent = `שגיאה: ${err.message}`;
+    // Push not supported yet (e.g. iOS app not installed to Home Screen).
   }
+}
+
+async function handlePushButtonClick() {
+  const btn = document.getElementById('enable-push');
+  const status = document.getElementById('push-status');
+
+  if (btn.dataset.mode === 'disable') {
+    status.textContent = 'Disabling...';
+    try {
+      await WordPush.disablePush(deviceId);
+      status.textContent = 'Notifications disabled on this device.';
+    } catch (err) {
+      status.textContent = `Error: ${err.message}`;
+    }
+  } else {
+    status.textContent = 'Enabling...';
+    try {
+      await WordPush.enablePush(deviceId, vapidPublicKey);
+      status.textContent = 'Notifications enabled on this device.';
+    } catch (err) {
+      status.textContent = `Error: ${err.message}`;
+    }
+  }
+  await refreshPushButton();
 }
 
 function setupTabs() {
@@ -98,6 +146,8 @@ function setupTabs() {
       document.getElementById(btn.dataset.target).classList.add('active');
       if (btn.dataset.target === 'practice-panel') {
         WordPractice.start();
+      } else if (btn.dataset.target === 'add-panel') {
+        renderWordList();
       }
     });
   });
@@ -117,10 +167,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
 
   document.getElementById('add-word-form').addEventListener('submit', handleAddWord);
-  document.getElementById('enable-push').addEventListener('click', handleEnableNotifications);
-  document.getElementById('flip-btn').addEventListener('click', () => WordPractice.flip());
-  document.getElementById('next-btn').addEventListener('click', () => WordPractice.next());
+  document.getElementById('enable-push').addEventListener('click', handlePushButtonClick);
+  document.getElementById('show-answer-btn').addEventListener('click', () => WordPractice.showAnswer());
+  document.getElementById('learning-btn').addEventListener('click', () => WordPractice.grade(false));
+  document.getElementById('know-btn').addEventListener('click', () => WordPractice.grade(true));
 
+  await refreshPushButton();
   await renderWordList();
 
   const params = new URLSearchParams(window.location.search);

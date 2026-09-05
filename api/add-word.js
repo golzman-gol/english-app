@@ -36,16 +36,20 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { deviceId, word } = req.body || {};
+  const { deviceId, word, translation: providedTranslation, sentence: providedSentence } = req.body || {};
   const cleanWord = String(word || '').trim();
   if (!deviceId || !cleanWord) {
     res.status(400).json({ error: 'deviceId and word are required' });
     return;
   }
 
+  const manualTranslation = String(providedTranslation || '').trim();
+  const manualSentence = String(providedSentence || '').trim();
+
+  // Only ask the free lookup APIs for whatever the user didn't type in themselves.
   const [translation, sentence] = await Promise.all([
-    fetchTranslation(cleanWord),
-    fetchExampleSentence(cleanWord),
+    manualTranslation ? Promise.resolve(manualTranslation) : fetchTranslation(cleanWord),
+    manualSentence ? Promise.resolve(manualSentence) : fetchExampleSentence(cleanWord),
   ]);
 
   const entry = {
@@ -54,6 +58,8 @@ module.exports = async (req, res) => {
     sentence,
     addedAt: Date.now(),
     lastNotifiedAt: 0,
+    mastered: false,
+    correctStreak: 0,
   };
 
   const key = `words:${deviceId}`;
